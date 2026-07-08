@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trivia Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="screen">
+    <section id="loginScreen" class="trivia-card">
+      <h1>Join Trivia</h1>
+      <form id="emailForm" class="email-form">
+        <label for="firstNameInput">First Name</label>
+        <input id="firstNameInput" type="text" placeholder="First name" required>
+
+        <label for="lastNameInput">Last Name</label>
+        <input id="lastNameInput" type="text" placeholder="Last name" required>
+
+        <label for="emailInput">Email</label>
+        <input id="emailInput" type="email" placeholder="you@example.com" required>
+        <button class="restart-button" type="submit">Join Lobby</button>
+      </form>
+      <p id="loginMessage" class="message"></p>
+    </section>
+
+    <section id="lobbyScreen" class="trivia-card" hidden>
+      <div class="top-bar">
+        <span>Lobby</span>
+        <span id="hostText">Waiting for host</span>
+      </div>
+
+      <h1>Trivia Lobby</h1>
+      <p class="lobby-note">Players in the lobby:</p>
+      <ul id="playerList" class="player-list"></ul>
+
+      <p id="lobbyMessage" class="message"></p>
+      <button id="startGameButton" class="restart-button" type="button">Start Game</button>
+      <button id="lobbyResetGameButton" class="danger-button" type="button" hidden>Reset Game</button>
+    </section>
+
+    <section id="hostScreen" class="trivia-card" hidden>
+      <div class="top-bar">
+        <span>Host View</span>
+        <span id="finishedText">Waiting for players</span>
+      </div>
+
+      <h1>Player Scores</h1>
+      <p id="hostMessage" class="message">Players are taking the trivia.</p>
+      <ul id="scoreList" class="player-list"></ul>
+      <button id="resetLobbyButton" class="restart-button" type="button" hidden>Open Lobby Again</button>
+      <button id="resetGameButton" class="danger-button" type="button">Reset Game</button>
+    </section>
+
+    <section id="gameScreen" class="trivia-card" hidden>
+      <div class="top-bar">
+        <span id="roundText">Round 1 of 10</span>
+        <span>Time: <strong id="timeText">5</strong></span>
+        <span>Score: <strong id="scoreText">0</strong></span>
+      </div>
+
+      <h1>Trivia Game</h1>
+      <p id="questionText">Question goes here.</p>
+
+      <section class="answer-grid" aria-label="Answer choices">
+        <button class="answer-button" type="button"></button>
+        <button class="answer-button" type="button"></button>
+        <button class="answer-button" type="button"></button>
+        <button class="answer-button" type="button"></button>
+      </section>
+
+      <p id="messageText" class="message"></p>
+      <button id="restartButton" class="restart-button" type="button" hidden>Play Again</button>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
