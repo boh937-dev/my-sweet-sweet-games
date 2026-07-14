@@ -95,6 +95,11 @@ const CURRENT_PLAYER_KEY = "triviaCurrentPlayer";
 const CURRENT_PLAYER_ID_KEY = "triviaCurrentPlayerId";
 const LOBBY_HEARTBEAT_MS = 3000;
 const STALE_PLAYER_MS = 12000;
+const HOST_CREDENTIALS = {
+  firstName: "shola",
+  lastName: "ekperigin",
+  email: "admin@mysweetsweetworld.com",
+};
 
 const loginScreen = document.querySelector("#loginScreen");
 const lobbyScreen = document.querySelector("#lobbyScreen");
@@ -176,6 +181,16 @@ function getPlayerDisplayName(player) {
 
 function isSamePlayer(firstPlayer, secondPlayer) {
   return getPlayerKey(firstPlayer) === getPlayerKey(secondPlayer);
+}
+
+function isAuthorizedHost(player) {
+  const normalizedPlayer = normalizePlayer(player);
+
+  return (
+    normalizedPlayer.firstName.toLowerCase() === HOST_CREDENTIALS.firstName &&
+    normalizedPlayer.lastName.toLowerCase() === HOST_CREDENTIALS.lastName &&
+    normalizedPlayer.email.toLowerCase() === HOST_CREDENTIALS.email
+  );
 }
 
 function getCurrentPlayerId() {
@@ -407,12 +422,16 @@ function addPlayer(player) {
 }
 
 function getTriviaPlayers() {
-  return pruneInactivePlayers().slice(1);
+  return pruneInactivePlayers().filter((player) => !isAuthorizedHost(player));
 }
 
 function isHost() {
   const players = pruneInactivePlayers();
-  return currentPlayer && players[0] && isSamePlayer(players[0], currentPlayer);
+  return Boolean(
+    currentPlayer &&
+    isAuthorizedHost(currentPlayer) &&
+    players.some((player) => isSamePlayerSession(player, currentPlayer))
+  );
 }
 
 function isCurrentPlayerInLobby() {
@@ -427,13 +446,14 @@ function isCurrentPlayerInLobby() {
 
 function renderLobby() {
   const players = pruneInactivePlayers();
+  const hostPlayer = players.find(isAuthorizedHost);
 
   playerList.innerHTML = "";
-  players.forEach((player, index) => {
+  players.forEach((player) => {
     const playerItem = document.createElement("li");
     playerItem.textContent = getPlayerDisplayName(player);
 
-    if (index === 0) {
+    if (isAuthorizedHost(player)) {
       const hostBadge = document.createElement("span");
       hostBadge.className = "host-badge";
       hostBadge.textContent = "Host";
@@ -443,9 +463,11 @@ function renderLobby() {
     playerList.append(playerItem);
   });
 
-  if (players.length === 0) {
-    hostText.textContent = "No host";
-    lobbyMessage.textContent = "No one is in the lobby yet.";
+  if (!hostPlayer) {
+    hostText.textContent = "Waiting for host";
+    lobbyMessage.textContent = players.length === 0
+      ? "No one is in the lobby yet."
+      : "Waiting for Shola Ekperigin to join and start the game.";
     startGameButton.disabled = true;
     lobbyResetGameButton.hidden = true;
     return;
@@ -457,7 +479,7 @@ function renderLobby() {
     startGameButton.disabled = false;
     lobbyResetGameButton.hidden = false;
   } else {
-    const hostName = players[0] ? getPlayerDisplayName(players[0]) : "host";
+    const hostName = getPlayerDisplayName(hostPlayer);
     hostText.textContent = `Host: ${hostName}`;
     lobbyMessage.textContent = "Waiting for the host to start.";
     startGameButton.disabled = true;
@@ -649,7 +671,7 @@ function renderScores() {
   const players = pruneInactivePlayers();
   const triviaPlayers = getTriviaPlayers();
   const finishedCount = triviaPlayers.filter((player) => hasScoreForPlayer(scores, player)).length;
-  const hostPlayer = players[0];
+  const hostPlayer = players.find(isAuthorizedHost);
   const rankedPlayers = triviaPlayers
     .map((player) => {
       const playerKey = getPlayerKey(player);
